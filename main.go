@@ -6,7 +6,7 @@ import (
 
 func main() {
 	rl.SetConfigFlags(rl.FlagMsaa4xHint)
-	rl.InitWindow(1080, 720, "FlatLandCraft")
+	rl.InitWindow(1080, 720, "FLATLAND GALAXY WARS")
 	rl.InitAudioDevice()
 	defer rl.CloseWindow()
 	defer rl.CloseAudioDevice()

@@ -1,6 +1,10 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"fmt"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 type Audio struct {
 	currentMusic Music
@@ -31,6 +35,38 @@ type SoundSlice struct {
 	volume       float32
 }
 
+func (sc *Scene) LoadMusic() {
+	sc.menuMusic.music = loadMusicFromEmbed("Audio/Music/menu.wav")
+	sc.menuMusic.volume = 0.5
+
+	sc.gameMusic.music = loadMusicFromEmbed("Audio/Music/game.wav")
+	sc.gameMusic.volume = 0.1
+
+	sc.winMusic.music = loadMusicFromEmbed("Audio/Music/win.wav")
+	sc.winMusic.volume = 0.1
+
+	sc.loseMusic.music = loadMusicFromEmbed("Audio/Music/lose.wav")
+	sc.loseMusic.volume = 0.1
+}
+
+func loadMusicFromEmbed(path string) rl.Music {
+	data, err := audioFiles.ReadFile(path)
+	if err != nil {
+		panic(fmt.Errorf("failed to read embedded music file %s: %w", path, err))
+	}
+	music := rl.LoadMusicStreamFromMemory(".wav", data, int32(len(data)))
+	return music
+}
+
+func (sc *Scene) LoadSounds() {
+	sc.collectSound = NewSoundSlice("collect", 0.1, false)
+	sc.fiveSound = NewSoundSlice("five", 0.5, false)
+	sc.impactSound = NewSoundSlice("impact", 0.2, true)
+	sc.spawnSound = NewSoundSlice("spawn", 0.2, false)
+	sc.warningSound = NewSoundSlice("warning", 0.7, false)
+	sc.pewSound = NewSoundSlice("pew", 0.2, true)
+}
+
 func NewSoundSlice(soundName string, volume float32, overlap bool) SoundSlice {
 	newSoundSlice := SoundSlice{
 		soundSlice:   make([]rl.Sound, 0),
@@ -43,11 +79,22 @@ func NewSoundSlice(soundName string, volume float32, overlap bool) SoundSlice {
 }
 
 func (ss *SoundSlice) InitSound(soundName string, overlap bool) {
+	sound := loadSoundFromEmbed("Audio/Sounds/" + soundName + ".wav")
 	if overlap {
-		ss.AddRepeatSoundToSlice(rl.LoadSound("Audio/Sounds/" + soundName + ".wav"))
+		ss.AddRepeatSoundToSlice(sound)
 	} else {
-		ss.AddSoundToSlice(rl.LoadSound("Audio/Sounds/" + soundName + ".wav"))
+		ss.AddSoundToSlice(sound)
 	}
+}
+
+func loadSoundFromEmbed(path string) rl.Sound {
+	data, err := audioFiles.ReadFile(path)
+	if err != nil {
+		panic(fmt.Errorf("failed to read embedded sound file %s: %w", path, err))
+	}
+	wave := rl.LoadWaveFromMemory(".wav", data, int32(len(data)))
+	sound := rl.LoadSoundFromWave(wave)
+	return sound
 }
 
 func (ss *SoundSlice) AddRepeatSoundToSlice(newSound rl.Sound) {
@@ -88,27 +135,4 @@ func (sc *Scene) PlayMusic(nextTrack Music) {
 func (sc *Scene) LoadAudio() {
 	sc.LoadMusic()
 	sc.LoadSounds()
-}
-
-func (sc *Scene) LoadMusic() {
-	sc.menuMusic.music = rl.LoadMusicStream("Audio/Music/menu.wav")
-	sc.menuMusic.volume = .5
-
-	sc.gameMusic.music = rl.LoadMusicStream("Audio/Music/game.wav")
-	sc.gameMusic.volume = .1
-
-	sc.winMusic.music = rl.LoadMusicStream("Audio/Music/win.wav")
-	sc.winMusic.volume = .1
-
-	sc.loseMusic.music = rl.LoadMusicStream("Audio/Music/lose.wav")
-	sc.loseMusic.volume = .1
-}
-
-func (sc *Scene) LoadSounds() {
-	sc.collectSound = NewSoundSlice("collect", .1, false)
-	sc.fiveSound = NewSoundSlice("five", .5, false)
-	sc.impactSound = NewSoundSlice("impact", .2, true)
-	sc.spawnSound = NewSoundSlice("spawn", .2, false)
-	sc.warningSound = NewSoundSlice("warning", .7, false)
-	sc.pewSound = NewSoundSlice("pew", .2, true)
 }

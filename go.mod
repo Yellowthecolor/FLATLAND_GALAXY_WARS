@@ -1,4 +1,4 @@
-module FinalProject
+module FLATLANDGALAXYWARS
 
 go 1.23.2
 
